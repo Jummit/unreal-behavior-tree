@@ -373,11 +373,13 @@ func _on_WebSocketServer_client_connected(id : int, protocol : String) -> void:
 
 
 func _on_WebSocketServer_client_disconnected(id : int, was_clean_close : bool) -> void:
-	clear_activity()
 	break_button.disabled = true
 	step_button.disabled = true
 	continue_button.disabled = true
 	current_node = -1
+	client_id = 0
+	clear_activity()
+	update_graph()
 
 
 func _on_WebSocketServer_data_received(id : int) -> void:
