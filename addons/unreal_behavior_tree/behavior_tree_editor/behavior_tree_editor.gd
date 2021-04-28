@@ -58,6 +58,17 @@ func _ready():
 			"_on_SearchDialog_attachment_selected")
 
 
+func _input(event : InputEvent) -> void:
+	if event is InputEventKey and event.scancode == KEY_F9:
+		mark_breakpoints()
+
+
+func _process(_delta : float) -> void:
+	if server.get_connection_status() !=\
+			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED:
+		server.poll()
+
+
 func set_behavior_tree(to) -> void:
 	tree = to
 	update_graph()
@@ -161,11 +172,6 @@ func update_graph() -> void:
 	update_graph_connections()
 
 
-func _input(event : InputEvent) -> void:
-	if event is InputEventKey and event.scancode == KEY_F9:
-		mark_breakpoints()
-
-
 func mark_breakpoints() -> void:
 	for node in graph_edit.get_children():
 		if node is GraphNode and node.selected:
@@ -184,10 +190,6 @@ func send_breakpoints():
 	})
 
 
-func _on_BehaviorGraphNode_raise_request(node : BehaviorNode) -> void:
-	emit_signal("resource_edited", node)
-
-
 func update_graph_connections() -> void: 
 	graph_edit.clear_connections()
 	for node in graph_edit.get_children():
@@ -197,6 +199,22 @@ func update_graph_connections() -> void:
 		var node : BehaviorNode = tree.nodes[node_id]
 		for to in node.connections:
 			graph_edit.connect_node(str(node_id), 0, str(to), 0)
+
+
+func clear_activity() -> void:
+	for connection in graph_edit.get_connection_list():
+		graph_edit.set_connection_activity(connection.from, 0,
+				connection.to, 0, 0)
+
+
+func send_message(message : Dictionary) -> void:
+	if (server.get_connection_status() !=\
+			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED) and client_id:
+		server.get_peer(client_id).put_var(message)
+
+
+func _on_BehaviorGraphNode_raise_request(node : BehaviorNode) -> void:
+	emit_signal("resource_edited", node)
 
 
 func _on_GraphEdit_popup_request(position : Vector2) -> void:
@@ -401,18 +419,6 @@ func _on_WebSocketServer_data_received(id : int) -> void:
 			continue_button.disabled = false
 
 
-func clear_activity() -> void:
-	for connection in graph_edit.get_connection_list():
-		graph_edit.set_connection_activity(connection.from, 0,
-				connection.to, 0, 0)
-
-
-func _process(_delta : float) -> void:
-	if server.get_connection_status() !=\
-			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED:
-		server.poll()
-
-
 func _on_BreakpointButton_pressed() -> void:
 	mark_breakpoints()
 
@@ -433,12 +439,6 @@ func _on_BreakButton_pressed() -> void:
 	send_message({
 		"type": "break",
 	})
-
-
-func send_message(message : Dictionary) -> void:
-	if (server.get_connection_status() !=\
-			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED) and client_id:
-		server.get_peer(client_id).put_var(message)
 
 
 func _on_ContinueButton_pressed() -> void:
