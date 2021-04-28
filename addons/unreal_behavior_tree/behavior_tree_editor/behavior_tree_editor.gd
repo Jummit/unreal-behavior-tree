@@ -91,6 +91,20 @@ func remove_comment(comment : Comment) -> void:
 
 func move_node(node : BehaviorNode, to : Vector2) -> void:
 	node.position = to
+	update_node_order()
+
+
+class NodeYSorter:
+	var tree : BehaviorTree
+	func sort(a : int, b : int) -> bool:
+		return tree.nodes[a].position.y < tree.nodes[b].position.y
+
+
+func update_node_order() -> void:
+	for node in tree.nodes:
+		var sorter := NodeYSorter.new()
+		sorter.tree = tree
+		tree.nodes[node].connections.sort_custom(sorter, "sort")
 
 
 func connect_nodes(from : int, to : int) -> void:
@@ -164,8 +178,6 @@ func mark_breakpoints() -> void:
 
 
 func send_breakpoints():
-	if not client_id:
-		return
 	send_message({
 		"type": "breakpoints",
 		"breakpoints": [] if skip_breakpoints else breakpoints,
@@ -422,8 +434,8 @@ func _on_BreakButton_pressed() -> void:
 
 
 func send_message(message : Dictionary) -> void:
-	if server.get_connection_status() !=\
-			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED and client_id:
+	if (server.get_connection_status() !=\
+			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED) and client_id:
 		server.get_peer(client_id).put_var(message)
 
 
