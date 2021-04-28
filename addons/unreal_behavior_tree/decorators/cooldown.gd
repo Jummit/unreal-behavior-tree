@@ -9,7 +9,7 @@ func get_name() -> String:
 
 
 func get_info() -> String:
-	return " of %s secods" % seconds
+	return "of %s second(s)" % seconds
 
 
 func run(node, subject : Node) -> bool:

@@ -1,6 +1,27 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://addons/unreal_behavior_tree/behavior_tree_editor/behavior_tree_editor.gd" type="Script" id=1]
+
+[sub_resource type="InputEventKey" id=1]
+pressed = true
+scancode = 16777252
+
+[sub_resource type="ShortCut" id=2]
+shortcut = SubResource( 1 )
+
+[sub_resource type="InputEventKey" id=4]
+pressed = true
+scancode = 16777253
+
+[sub_resource type="ShortCut" id=3]
+shortcut = SubResource( 4 )
+
+[sub_resource type="InputEventKey" id=5]
+pressed = true
+scancode = 16777255
+
+[sub_resource type="ShortCut" id=6]
+shortcut = SubResource( 5 )
 
 [node name="BehaviorTreeEditor" type="Control"]
 anchor_right = 1.0
@@ -11,24 +32,97 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="GraphEdit" type="GraphEdit" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 1
-custom_colors/activity = Color( 1, 0.513726, 0, 1 )
-right_disconnects = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="_begin_node_move" from="GraphEdit" to="." method="_on_GraphEdit_begin_node_move"]
-[connection signal="_end_node_move" from="GraphEdit" to="." method="_on_GraphEdit_end_node_move"]
-[connection signal="connection_request" from="GraphEdit" to="." method="_on_GraphEdit_connection_request"]
-[connection signal="connection_to_empty" from="GraphEdit" to="." method="_on_GraphEdit_connection_to_empty"]
-[connection signal="copy_nodes_request" from="GraphEdit" to="." method="_on_GraphEdit_copy_nodes_request"]
-[connection signal="delete_nodes_request" from="GraphEdit" to="." method="_on_GraphEdit_delete_nodes_request"]
-[connection signal="disconnection_request" from="GraphEdit" to="." method="_on_GraphEdit_disconnection_request"]
-[connection signal="draw" from="GraphEdit" to="." method="_on_GraphEdit_draw"]
-[connection signal="duplicate_nodes_request" from="GraphEdit" to="." method="_on_GraphEdit_duplicate_nodes_request"]
-[connection signal="paste_nodes_request" from="GraphEdit" to="." method="_on_GraphEdit_paste_nodes_request"]
-[connection signal="popup_request" from="GraphEdit" to="." method="_on_GraphEdit_popup_request"]
+[node name="GraphEdit" type="GraphEdit" parent="VBoxContainer"]
+margin_right = 1024.0
+margin_bottom = 566.0
+mouse_filter = 1
+size_flags_vertical = 3
+custom_colors/activity = Color( 1, 0.513726, 0, 1 )
+right_disconnects = true
+scroll_offset = Vector2( 0, -30 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DebugPanel" type="Control" parent="VBoxContainer"]
+margin_top = 570.0
+margin_right = 1024.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 0, 30 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/DebugPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+alignment = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BreakpointButton" type="ToolButton" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+margin_left = 932.0
+margin_right = 944.0
+margin_bottom = 30.0
+hint_tooltip = "Mark/unmark the selected nodes as breakpoints"
+shortcut = SubResource( 2 )
+
+[node name="SkipBreakpointsButton" type="ToolButton" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+margin_left = 948.0
+margin_right = 960.0
+margin_bottom = 30.0
+hint_tooltip = "Toggle skipping breakpoints"
+
+[node name="VSeparator2" type="VSeparator" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+margin_left = 964.0
+margin_right = 968.0
+margin_bottom = 30.0
+
+[node name="StepButton" type="ToolButton" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+margin_left = 972.0
+margin_right = 984.0
+margin_bottom = 30.0
+hint_tooltip = "Step Over"
+shortcut = SubResource( 3 )
+
+[node name="VSeparator3" type="VSeparator" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+margin_left = 988.0
+margin_right = 992.0
+margin_bottom = 30.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BreakButton" type="ToolButton" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+margin_left = 996.0
+margin_right = 1008.0
+margin_bottom = 30.0
+hint_tooltip = "Break"
+
+[node name="ContinueButton" type="ToolButton" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+margin_left = 1012.0
+margin_right = 1024.0
+margin_bottom = 30.0
+hint_tooltip = "Continue"
+shortcut = SubResource( 6 )
+
+[connection signal="_begin_node_move" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_begin_node_move"]
+[connection signal="_end_node_move" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_end_node_move"]
+[connection signal="connection_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_connection_request"]
+[connection signal="connection_to_empty" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_connection_to_empty"]
+[connection signal="copy_nodes_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_copy_nodes_request"]
+[connection signal="delete_nodes_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_delete_nodes_request"]
+[connection signal="disconnection_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_disconnection_request"]
+[connection signal="duplicate_nodes_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_duplicate_nodes_request"]
+[connection signal="paste_nodes_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_paste_nodes_request"]
+[connection signal="popup_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_popup_request"]
+[connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/BreakpointButton" to="." method="_on_BreakpointButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/SkipBreakpointsButton" to="." method="_on_SkipBreakpointsButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/StepButton" to="." method="_on_StepButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/BreakButton" to="." method="_on_BreakButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/ContinueButton" to="." method="_on_ContinueButton_pressed"]

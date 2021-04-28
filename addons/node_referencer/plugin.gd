@@ -45,6 +45,8 @@ func _on_ToolMenu_update_node_references_pressed(_ud) -> void:
 	var root := search_node_that_uses(
 			get_editor_interface().get_edited_scene_root(),
 			get_editor_interface().get_script_editor().get_current_script())
+	if not root:
+		return
 	for assign in OS.clipboard.split("\n", false):
 		var node_referenced = get_editor_interface().get_edited_scene_root().\
 				find_node(get_node_name(assign))
@@ -71,7 +73,7 @@ static func search_node_that_uses(root : Node, script : Script) -> Node:
 		var found := search_node_that_uses(node, script)
 		if found.name != "":
 			return found
-	return Node.new()
+	return null
 
 
 func get_node_reference(to_node : Node, node_path : NodePath) -> String:

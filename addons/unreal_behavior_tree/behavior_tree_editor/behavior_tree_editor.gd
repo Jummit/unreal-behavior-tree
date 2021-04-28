@@ -18,17 +18,16 @@ var breakpoints : Array
 var skip_breakpoints := false
 var current_node := -1
 
-var breakpoint_button : Button
-var skip_breakpoints_button : Button
-var break_button : Button
-var next_button : Button
-var continue_button : Button
-
 const Comment = preload("../resources/comment.gd")
 const BehaviorGraphNode = preload("behavior_graph_node/behavior_graph_node.gd")
 const CommentGraphNode = preload("comment_graph_node.gd")
 
-onready var graph_edit : GraphEdit = $GraphEdit
+onready var graph_edit : GraphEdit = $VBoxContainer/GraphEdit
+onready var continue_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/ContinueButton
+onready var breakpoint_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/BreakpointButton
+onready var skip_breakpoints_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/SkipBreakpointsButton
+onready var step_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/StepButton
+onready var break_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/BreakButton
 
 func _ready():
 	server.listen(7777)
@@ -47,45 +46,12 @@ func _ready():
 	graph_edit.get_zoom_hbox().add_child(create_node_button)
 	graph_edit.get_zoom_hbox().move_child(create_node_button, 0)
 	
-	breakpoint_button = Button.new()
 	breakpoint_button.icon = get_icon("DebugSkipBreakpointsOff", "EditorIcons")
-	breakpoint_button.flat = true
-	breakpoint_button.hint_tooltip = "Mark/unmark the selected nodes as breakpoints"
-	breakpoint_button.connect("pressed", self, "_on_BreakpointButton_pressed")
-	graph_edit.get_zoom_hbox().add_child(breakpoint_button)
-
-	skip_breakpoints_button = Button.new()
-	skip_breakpoints_button.icon = get_icon("DebugSkipBreakpointsOn", "EditorIcons")
-	skip_breakpoints_button.toggle_mode = true
-	skip_breakpoints_button.flat = true
-	skip_breakpoints_button.hint_tooltip = "Skip breakpoints"
-	skip_breakpoints_button.connect("pressed", self, "_on_SkipBreakpointsButton_pressed")
-	graph_edit.get_zoom_hbox().add_child(skip_breakpoints_button)
-	
-	break_button = Button.new()
-	break_button.disabled = true
+	skip_breakpoints_button.icon = get_icon("DebugSkipBreakpointsOff", "EditorIcons")
 	break_button.icon = get_icon("Pause", "EditorIcons")
-	break_button.flat = true
-	break_button.hint_tooltip = "Break"
-	break_button.connect("pressed", self, "_on_BreakButton_pressed")
-	graph_edit.get_zoom_hbox().add_child(break_button)
-	
-	next_button = Button.new()
-	next_button.disabled = true
-	next_button.icon = get_icon("DebugNext", "EditorIcons")
-	next_button.flat = true
-	next_button.hint_tooltip = "Go to next node"
-	next_button.connect("pressed", self, "_on_NextButton_pressed")
-	graph_edit.get_zoom_hbox().add_child(next_button)
-	
-	continue_button = Button.new()
-	continue_button.disabled = true
+	step_button.icon = get_icon("DebugNext", "EditorIcons")
 	continue_button.icon = get_icon("DebugContinue", "EditorIcons")
-	continue_button.flat = true
-	continue_button.hint_tooltip = "Continue execution"
-	continue_button.connect("pressed", self, "_on_ContinueButton_pressed")
-	graph_edit.get_zoom_hbox().add_child(continue_button)
-	
+
 	search_dialog.connect("node_selected", self,
 			"_on_SearchDialog_node_selected")
 	search_dialog.connect("attachment_selected", self,
@@ -160,8 +126,9 @@ func update_graph() -> void:
 		var node : BehaviorNode = tree.nodes[node_id]
 		var graph_node : BehaviorGraphNode = preload(\
 				"behavior_graph_node/behavior_graph_node.tscn").instance()
-		graph_node.node = node
 		graph_node.name = str(node_id)
+		graph_edit.add_child(graph_node)
+		graph_node.node = node
 		if node_id in breakpoints:
 			graph_node.overlay = GraphNode.OVERLAY_BREAKPOINT
 		if node_id == current_node:
@@ -177,7 +144,6 @@ func update_graph() -> void:
 				"_on_BehaviorGraphNode_attachment_added", [node])
 		graph_node.connect("raise_request", self,
 				"_on_BehaviorGraphNode_raise_request", [node])
-		graph_edit.add_child(graph_node)
 	update_graph_connections()
 
 
@@ -397,7 +363,7 @@ func _on_WebSocketServer_client_connected(id : int, protocol : String) -> void:
 func _on_WebSocketServer_client_disconnected(id : int, was_clean_close : bool) -> void:
 	clear_activity()
 	break_button.disabled = true
-	next_button.disabled = true
+	step_button.disabled = true
 	continue_button.disabled = true
 	current_node = -1
 
@@ -417,7 +383,7 @@ func _on_WebSocketServer_data_received(id : int) -> void:
 						str(node), 0, 100)
 				last_node = node
 		"stopped":
-			next_button.disabled = false
+			step_button.disabled = false
 			continue_button.disabled = false
 
 
@@ -439,26 +405,28 @@ func _on_BreakpointButton_pressed() -> void:
 
 func _on_SkipBreakpointsButton_pressed() -> void:
 	skip_breakpoints = not skip_breakpoints
+	skip_breakpoints_button.icon = get_icon("DebugSkipBreakpointsOn" if\
+			skip_breakpoints else "DebugSkipBreakpointsOff", "EditorIcons")
 	send_breakpoints()
 
 
 func _on_BreakButton_pressed() -> void:
-	next_button.disabled = false
+	step_button.disabled = false
 	continue_button.disabled = false
 	server.get_peer(client_id).put_var({
 		"type": "break",
 	})
 
 
-func _on_NextButton_pressed() -> void:
-	server.get_peer(client_id).put_var({
-		"type": "next",
-	})
-
-
 func _on_ContinueButton_pressed() -> void:
-	next_button.disabled = true
+	step_button.disabled = true
 	continue_button.disabled = true
 	server.get_peer(client_id).put_var({
 		"type": "continue",
+	})
+
+
+func _on_StepButton_pressed() -> void:
+	server.get_peer(client_id).put_var({
+		"type": "next",
 	})
