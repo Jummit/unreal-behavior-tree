@@ -1,6 +1,6 @@
 tool
 extends Resource
-class_name BehaviorAttachment
+class_name BehaviorAttachment, "../icon.svg"
 
 var name : String setget , get_name
 

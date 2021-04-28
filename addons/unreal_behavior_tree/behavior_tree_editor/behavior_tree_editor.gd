@@ -51,7 +51,7 @@ func _ready():
 	break_button.icon = get_icon("Pause", "EditorIcons")
 	step_button.icon = get_icon("DebugNext", "EditorIcons")
 	continue_button.icon = get_icon("DebugContinue", "EditorIcons")
-
+	
 	search_dialog.connect("node_selected", self,
 			"_on_SearchDialog_node_selected")
 	search_dialog.connect("attachment_selected", self,
@@ -166,7 +166,7 @@ func mark_breakpoints() -> void:
 func send_breakpoints():
 	if not client_id:
 		return
-	server.get_peer(client_id).put_var({
+	send_message({
 		"type": "breakpoints",
 		"breakpoints": [] if skip_breakpoints else breakpoints,
 	})
@@ -411,22 +411,31 @@ func _on_SkipBreakpointsButton_pressed() -> void:
 
 
 func _on_BreakButton_pressed() -> void:
+	if server.get_connection_status() ==\
+			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED or not client_id:
+		return
 	step_button.disabled = false
 	continue_button.disabled = false
-	server.get_peer(client_id).put_var({
+	send_message({
 		"type": "break",
 	})
+
+
+func send_message(message : Dictionary) -> void:
+	if server.get_connection_status() !=\
+			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED and client_id:
+		server.get_peer(client_id).put_var(message)
 
 
 func _on_ContinueButton_pressed() -> void:
 	step_button.disabled = true
 	continue_button.disabled = true
-	server.get_peer(client_id).put_var({
+	send_message({
 		"type": "continue",
 	})
 
 
 func _on_StepButton_pressed() -> void:
-	server.get_peer(client_id).put_var({
+	send_message({
 		"type": "next",
 	})

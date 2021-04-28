@@ -1,5 +1,5 @@
 extends Node
-class_name BehaviorTreePlayer, "behavior_tree_player.svg"
+class_name BehaviorTreePlayer, "../icon.svg"
 
 export var tree : BehaviorTree
 export var groups : Dictionary

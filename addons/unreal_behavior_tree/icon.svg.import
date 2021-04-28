@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/behavior_tree_player.svg-a4b84c0088104748aaffd2607c559167.stex"
+path="res://.import/icon.svg-c8da76ab3b418744814348398e5695a7.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/unreal_behavior_tree/behavior_tree_player/behavior_tree_player.svg"
-dest_files=[ "res://.import/behavior_tree_player.svg-a4b84c0088104748aaffd2607c559167.stex" ]
+source_file="res://addons/unreal_behavior_tree/icon.svg"
+dest_files=[ "res://.import/icon.svg-c8da76ab3b418744814348398e5695a7.stex" ]
 
 [params]
 

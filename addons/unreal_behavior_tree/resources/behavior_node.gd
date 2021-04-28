@@ -1,6 +1,6 @@
 tool
 extends Resource
-class_name BehaviorNode
+class_name BehaviorNode, "../icon.svg"
 
 export var position : Vector2
 export var connections : Array

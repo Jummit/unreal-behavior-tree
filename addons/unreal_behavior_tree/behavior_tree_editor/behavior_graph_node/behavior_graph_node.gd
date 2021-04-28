@@ -23,6 +23,7 @@ func set_node(_node : BehaviorNode) -> void:
 	for attachment in node.attachments:
 		var item := attachments.create_item(root)
 		item.custom_minimum_height = 20
+		item.set_metadata(0, attachment)
 		item.set_text(0, attachment.name + " " + attachment.get_info())
 		item.add_button(0, get_icon("Edit", "EditorIcons"))
 		item.add_button(0, get_icon("Remove", "EditorIcons"))
@@ -37,13 +38,13 @@ func _input(event : InputEvent) -> void:
 	attachments.scroll_to_item(attachments.get_root())
 
 
-func _on_AttachmentInfo_edited(info : PanelContainer) -> void:
-	emit_signal("attachment_edited", info.attachment)
-
-
 func _on_AddAttachmentButton_pressed() -> void:
 	emit_signal("attachment_added")
 
 
-func _on_AttachmentInfo_removed(info : PanelContainer) -> void:
-	emit_signal("attachment_removed", info.attachment)
+func _on_Attachments_button_pressed(item : TreeItem, _column : int,
+		id : int) -> void:
+	if id == 0:
+		emit_signal("attachment_edited", item.get_metadata(0))
+	else:
+		emit_signal("attachment_removed", item.get_metadata(0))

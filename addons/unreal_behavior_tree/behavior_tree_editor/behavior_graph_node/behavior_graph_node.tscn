@@ -64,4 +64,5 @@ margin_bottom = 49.0
 hint_tooltip = "Attach a new decorator"
 text = "+"
 
+[connection signal="button_pressed" from="Attachments" to="." method="_on_Attachments_button_pressed"]
 [connection signal="pressed" from="AddAttachmentButton" to="." method="_on_AddAttachmentButton_pressed"]

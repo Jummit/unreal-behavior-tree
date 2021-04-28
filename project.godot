@@ -50,14 +50,14 @@ _global_script_classes=[ {
 "path": "res://addons/unreal_behavior_tree/behavior_tree_player/behavior_tree_player.gd"
 } ]
 _global_script_class_icons={
-"BehaviorAttachment": "",
+"BehaviorAttachment": "res://addons/unreal_behavior_tree/icon.svg",
 "BehaviorComposite": "",
 "BehaviorDecorator": "",
-"BehaviorNode": "",
+"BehaviorNode": "res://addons/unreal_behavior_tree/icon.svg",
 "BehaviorService": "",
 "BehaviorTask": "",
 "BehaviorTree": "",
-"BehaviorTreePlayer": "res://addons/unreal_behavior_tree/behavior_tree_player/behavior_tree_player.svg"
+"BehaviorTreePlayer": "res://addons/unreal_behavior_tree/icon.svg"
 }
 
 [application]
