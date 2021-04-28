@@ -1,0 +1,54 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/unreal_behavior_tree/behavior_tree_editor/behavior_graph_node/behavior_graph_node.gd" type="Script" id=1]
+
+[node name="BehaviorGraphNode" type="GraphNode"]
+margin_right = 52.0
+margin_bottom = 66.0
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color( 1, 1, 1, 1 )
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color( 1, 1, 1, 1 )
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color( 1, 1, 1, 1 )
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color( 1, 1, 1, 1 )
+slot/2/left_enabled = false
+slot/2/left_type = 0
+slot/2/left_color = Color( 1, 1, 1, 1 )
+slot/2/right_enabled = false
+slot/2/right_type = 0
+slot/2/right_color = Color( 1, 1, 1, 1 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Attachments" type="Tree" parent="."]
+margin_left = 16.0
+margin_top = 24.0
+margin_right = 36.0
+margin_bottom = 25.0
+columns = 3
+hide_root = true
+
+[node name="Control" type="Control" parent="."]
+margin_left = 16.0
+margin_top = 26.0
+margin_right = 36.0
+margin_bottom = 28.0
+rect_min_size = Vector2( 0, 2 )
+
+[node name="AddAttachmentButton" type="Button" parent="."]
+margin_left = 16.0
+margin_top = 29.0
+margin_right = 36.0
+margin_bottom = 49.0
+hint_tooltip = "Attach a new decorator"
+text = "+"
+
+[connection signal="pressed" from="AddAttachmentButton" to="." method="_on_AddAttachmentButton_pressed"]

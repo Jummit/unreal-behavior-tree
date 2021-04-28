@@ -1,0 +1,3 @@
+tool
+extends BehaviorAttachment
+class_name BehaviorService
