@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://addons/unreal_behavior_tree/behavior_tree_player/behavior_tree_player.gd" type="Script" id=1]
 [ext_resource path="res://addons/unreal_behavior_tree/resources/behavior_tree.gd" type="Script" id=2]
@@ -45,23 +45,27 @@ max_times = 71
 script = ExtResource( 14 )
 condition = "health > 10"
 
+[sub_resource type="Resource" id=16]
+script = ExtResource( 6 )
+max_times = 10
+
 [sub_resource type="Resource" id=6]
 script = ExtResource( 4 )
 position = Vector2( 300, 40 )
 connections = [  ]
-attachments = [ SubResource( 5 ), SubResource( 13 ) ]
+attachments = [ SubResource( 5 ), SubResource( 13 ), SubResource( 16 ) ]
 function = "move"
 
 [sub_resource type="Resource" id=7]
 script = ExtResource( 8 )
-position = Vector2( 300, 180 )
+position = Vector2( 300, 220 )
 connections = [  ]
 attachments = [  ]
 time = 0.202
 
 [sub_resource type="Resource" id=14]
 script = ExtResource( 10 )
-position = Vector2( 300, 260 )
+position = Vector2( 300, 300 )
 connections = [  ]
 attachments = [  ]
 expression = "health -= 1"
@@ -89,5 +93,5 @@ script = ExtResource( 3 )
 script = ExtResource( 1 )
 tree = SubResource( 11 )
 state = {
-"health": 25
+"health": 20
 }

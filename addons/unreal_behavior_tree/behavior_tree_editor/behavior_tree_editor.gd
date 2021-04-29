@@ -338,11 +338,15 @@ func _on_CommentGraph_resize_request(new_min_size : Vector2,
 
 
 func _on_SearchDialog_attachment_selected(attachment : BehaviorAttachment) -> void:
+	do_add_attachment(adding_attachment_to, attachment)
+
+
+func do_add_attachment(node : BehaviorNode,
+		attachment : BehaviorAttachment) -> void:
 	undo_redo.create_action("Add Attachment")
-	undo_redo.add_do_method(self, "add_attachment", adding_attachment_to,
-			attachment, adding_attachment_to.attachments.size())
-	undo_redo.add_undo_method(self, "remove_attachment", adding_attachment_to,
-			attachment)
+	undo_redo.add_do_method(self, "add_attachment", node,
+			attachment, node.attachments.size())
+	undo_redo.add_undo_method(self, "remove_attachment", node, attachment)
 	undo_redo.add_do_method(self, "update_graph")
 	undo_redo.add_undo_method(self, "update_graph")
 	undo_redo.commit_action()
@@ -379,9 +383,14 @@ func _on_BehaviorGraphNode_attachment_removed(attachment : BehaviorAttachment,
 	undo_redo.commit_action()
 
 
-func _on_BehaviorGraphNode_attachment_added(node : BehaviorNode) -> void:
-	adding_attachment_to = node
-	_show_create_dialog(false, search_dialog.Mode.Attachments)
+func _on_BehaviorGraphNode_attachment_added(attachment : BehaviorAttachment,
+		node : BehaviorNode) -> void:
+	if attachment:
+		yield(get_tree(), "idle_frame")
+		do_add_attachment(node, attachment)
+	else:
+		adding_attachment_to = node
+		_show_create_dialog(false, search_dialog.Mode.Attachments)
 
 
 func _on_WebSocketServer_client_connected(id : int, protocol : String) -> void:
