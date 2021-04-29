@@ -10,3 +10,7 @@ func find_spot():
 func move():
 	position = position.move_toward(target, 1)
 	return position != target
+
+
+func say():
+	print("hello")

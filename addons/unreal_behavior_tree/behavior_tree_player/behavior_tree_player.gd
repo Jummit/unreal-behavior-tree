@@ -44,6 +44,15 @@ func _ready() -> void:
 		client.connect("connection_closed", self, "_on_WebSocketClient_connection_closed")
 		client.connect("connection_error", self, "_on_WebSocketClient_connection_error")
 		client.connect("data_received", self, "_on_WebSocketClient_data_received")
+	for node_id in tree.nodes:
+		for attachment in tree.nodes[node_id].attachments:
+			if attachment is BehaviorService:
+				var timer := Timer.new()
+				timer.wait_time = attachment.interval
+				timer.autostart = true
+				timer.connect("timeout", self, "_on_ServiceTimer_timeout",
+						[attachment, node_id])
+				add_child(timer)
 	while true:
 		var result = execute_node(tree.nodes[0].connections[0])
 		if result is GDScriptFunctionState:
@@ -128,3 +137,8 @@ func _on_WebSocketClient_data_received() -> void:
 		"next":
 			stopped = false
 			stop_on_next = true
+
+
+func _on_ServiceTimer_timeout(service : BehaviorService, node : int) -> void:
+	if node in Array(stack):
+		service.run(self)
