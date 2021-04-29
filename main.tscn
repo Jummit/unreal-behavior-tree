@@ -91,15 +91,3 @@ tree = SubResource( 11 )
 state = {
 "health": 25
 }
-
-[node name="Position2D" type="Position2D" parent="."]
-position = Vector2( 411.601, 241.558 )
-
-[node name="Button" type="Button" parent="."]
-margin_right = 90.0
-margin_bottom = 38.0
-toggle_mode = true
-flat = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
