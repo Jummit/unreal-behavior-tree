@@ -24,6 +24,7 @@ var tasks := [
 	preload("../../tasks/wait.gd"),
 	preload("../../tasks/call_function.gd"),
 	preload("../../tasks/emit_signal.gd"),
+	preload("../../tasks/change_state.gd"),
 ]
 
 var decorators := [

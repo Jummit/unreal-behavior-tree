@@ -8,7 +8,7 @@ func get_name() -> String:
 
 
 func get_info() -> String:
-	return "Max. %s times" % max_times
+	return "%s times" % max_times
 
 
 func run(node, subject : Node) -> bool:

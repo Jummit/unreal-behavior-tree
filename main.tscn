@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://addons/unreal_behavior_tree/behavior_tree_player/behavior_tree_player.gd" type="Script" id=1]
 [ext_resource path="res://addons/unreal_behavior_tree/resources/behavior_tree.gd" type="Script" id=2]
@@ -9,16 +9,20 @@
 [ext_resource path="res://addons/unreal_behavior_tree/composites/sequence.gd" type="Script" id=7]
 [ext_resource path="res://addons/unreal_behavior_tree/tasks/wait.gd" type="Script" id=8]
 [ext_resource path="res://icon.png" type="Texture" id=9]
-[ext_resource path="res://addons/unreal_behavior_tree/composites/selector.gd" type="Script" id=10]
-[ext_resource path="res://addons/unreal_behavior_tree/tasks/finish.gd" type="Script" id=11]
+[ext_resource path="res://addons/unreal_behavior_tree/tasks/change_state.gd" type="Script" id=10]
 [ext_resource path="res://addons/unreal_behavior_tree/services/call_function.gd" type="Script" id=12]
-[ext_resource path="res://addons/unreal_behavior_tree/decorators/time_limit.gd" type="Script" id=13]
 [ext_resource path="res://addons/unreal_behavior_tree/decorators/check_condition.gd" type="Script" id=14]
 
 [sub_resource type="Resource" id=1]
 script = ExtResource( 5 )
-position = Vector2( 0, -20 )
+position = Vector2( 0, -40 )
 connections = [ 2 ]
+attachments = [  ]
+
+[sub_resource type="Resource" id=4]
+script = ExtResource( 7 )
+position = Vector2( 120, -40 )
+connections = [ 1, 3, 4, 5 ]
 attachments = [  ]
 
 [sub_resource type="Resource" id=2]
@@ -33,19 +37,9 @@ connections = [  ]
 attachments = [ SubResource( 2 ) ]
 function = "find_spot"
 
-[sub_resource type="Resource" id=4]
-script = ExtResource( 7 )
-position = Vector2( 120, -20 )
-connections = [ 1, 3, 4, 5 ]
-attachments = [  ]
-
 [sub_resource type="Resource" id=5]
 script = ExtResource( 6 )
 max_times = 71
-
-[sub_resource type="Resource" id=12]
-script = ExtResource( 13 )
-seconds = 1.0
 
 [sub_resource type="Resource" id=13]
 script = ExtResource( 14 )
@@ -55,34 +49,22 @@ condition = "health > 10"
 script = ExtResource( 4 )
 position = Vector2( 300, 60 )
 connections = [  ]
-attachments = [ SubResource( 5 ), SubResource( 12 ), SubResource( 13 ) ]
+attachments = [ SubResource( 5 ), SubResource( 13 ) ]
 function = "move"
 
 [sub_resource type="Resource" id=7]
 script = ExtResource( 8 )
-position = Vector2( 300, 180 )
+position = Vector2( 300, 200 )
 connections = [  ]
 attachments = [  ]
 time = 0.202
 
-[sub_resource type="Resource" id=8]
+[sub_resource type="Resource" id=14]
 script = ExtResource( 10 )
-position = Vector2( 300, 300 )
-connections = [ 6, 7 ]
-attachments = [  ]
-
-[sub_resource type="Resource" id=9]
-script = ExtResource( 8 )
-position = Vector2( 480, 260 )
+position = Vector2( 300, 280 )
 connections = [  ]
 attachments = [  ]
-time = 1.0
-
-[sub_resource type="Resource" id=10]
-script = ExtResource( 11 )
-position = Vector2( 480, 360 )
-connections = [  ]
-attachments = [  ]
+expression = "health -= 1"
 
 [sub_resource type="Resource" id=11]
 script = ExtResource( 2 )
@@ -92,9 +74,7 @@ nodes = {
 2: SubResource( 4 ),
 3: SubResource( 6 ),
 4: SubResource( 7 ),
-5: SubResource( 8 ),
-6: SubResource( 9 ),
-7: SubResource( 10 )
+5: SubResource( 14 )
 }
 comments = [  ]
 
@@ -108,6 +88,9 @@ script = ExtResource( 3 )
 [node name="BehaviorTreePlayer" type="Node" parent="Actor"]
 script = ExtResource( 1 )
 tree = SubResource( 11 )
+state = {
+"health": 25
+}
 
 [node name="Position2D" type="Position2D" parent="."]
 position = Vector2( 411.601, 241.558 )

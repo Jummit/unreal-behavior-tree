@@ -2,8 +2,7 @@ extends Node
 class_name BehaviorTreePlayer, "../icon.svg"
 
 export var tree : BehaviorTree
-export var groups : Dictionary
-export var data : Dictionary
+export var state : Dictionary
 
 onready var subject := get_parent()
 var client : WebSocketClient

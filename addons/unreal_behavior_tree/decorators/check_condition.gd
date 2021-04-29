@@ -12,9 +12,15 @@ func get_text() -> String:
 
 
 func run(node, subject : Node) -> bool:
-	var condition := Expression.new()
-	# TODO: run expression
-	if not condition:
+	var script := GDScript.new()
+	script.source_code = """
+extends DictionaryWrapper
+func run() -> bool:
+	return self.""" + condition
+	script.reload()
+	var instance = script.new()
+	instance.state = subject.state
+	if not instance.run():
 		return false
 	var result = node.run(subject)
 	if result is GDScriptFunctionState:
