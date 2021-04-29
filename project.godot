@@ -70,7 +70,7 @@ _global_script_class_icons={
 
 config/name="Unreal Behavior Tree Demo"
 run/main_scene="res://main.tscn"
-config/icon="res://icon.png"
+config/icon="res://icon.svg"
 
 [editor_plugins]
 
