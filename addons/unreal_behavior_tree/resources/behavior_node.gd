@@ -23,3 +23,7 @@ func run(_subject : Node) -> bool:
 
 func get_info() -> String:
 	return ""
+
+
+func get_text() -> String:
+	return get_name() + " " + get_info()

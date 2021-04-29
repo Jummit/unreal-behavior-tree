@@ -14,7 +14,7 @@ onready var attachments : Tree = $Attachments
 func set_node(_node : BehaviorNode) -> void:
 	node = _node
 	offset = node.position
-	title = node.get_name() + " " + node.get_info()
+	title = node.get_text()
 	var root := attachments.create_item()
 	attachments.set_column_expand(0, true)
 	attachments.visible = not node.attachments.empty()
@@ -24,7 +24,8 @@ func set_node(_node : BehaviorNode) -> void:
 		var item := attachments.create_item(root)
 		item.custom_minimum_height = 20
 		item.set_metadata(0, attachment)
-		item.set_text(0, attachment.name + " " + attachment.get_info())
+		item.set_custom_bg_color(0, Color.red if attachment is BehaviorService else Color.blue)
+		item.set_text(0, attachment.get_text())
 		item.add_button(0, get_icon("Edit", "EditorIcons"))
 		item.add_button(0, get_icon("Remove", "EditorIcons"))
 		attachments.rect_min_size.y += 26

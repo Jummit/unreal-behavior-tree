@@ -8,6 +8,10 @@ Dialog to search and choose nodes to add to the graph
 signal node_selected(node)
 signal attachment_selected(attachment)
 
+var services := [
+	preload("../../services/call_function.gd"),
+]
+
 var composites := [
 	preload("../../composites/parallel.gd"),
 	preload("../../composites/selector.gd"),
@@ -28,6 +32,7 @@ var decorators := [
 	preload("../../decorators/cooldown.gd"),
 	preload("../../decorators/loop.gd"),
 	preload("../../decorators/time_limit.gd"),
+	preload("../../decorators/call_function.gd"),
 ]
 
 enum Mode {
@@ -48,7 +53,7 @@ func update_list(search_term := "") -> void:
 	list.clear()
 	var root := list.create_item()
 	var roots := {}
-	for item in decorators if mode == Mode.Attachments else composites + tasks:
+	for item in decorators + services if mode == Mode.Attachments else composites + tasks:
 		var type := get_type(item.new())
 		if search_term and not search_term.to_lower().strip_edges() in item.new().name.to_lower():
 			continue
@@ -78,7 +83,7 @@ func get_type(item) -> String:
 func _on_NodeList_item_activated() -> void:
 	var item = list.get_selected().get_metadata(0).new()
 	emit_signal("node_selected" if mode == Mode.Nodes else "attachment_selected",
-			item)
+		item)
 	hide()
 
 

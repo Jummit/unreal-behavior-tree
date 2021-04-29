@@ -7,8 +7,8 @@ func get_name() -> String:
 	return "Check Condition"
 
 
-func get_info() -> String:
-	return condition
+func get_text() -> String:
+	return "If " + condition
 
 
 func run(node, subject : Node) -> bool:

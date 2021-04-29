@@ -30,12 +30,6 @@ slot/1/left_color = Color( 1, 1, 1, 1 )
 slot/1/right_enabled = false
 slot/1/right_type = 0
 slot/1/right_color = Color( 1, 1, 1, 1 )
-slot/2/left_enabled = false
-slot/2/left_type = 0
-slot/2/left_color = Color( 1, 1, 1, 1 )
-slot/2/right_enabled = false
-slot/2/right_type = 0
-slot/2/right_color = Color( 1, 1, 1, 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -49,18 +43,11 @@ margin_bottom = 25.0
 theme = SubResource( 2 )
 hide_root = true
 
-[node name="Control" type="Control" parent="."]
+[node name="AddAttachmentButton" type="Button" parent="."]
 margin_left = 16.0
 margin_top = 26.0
 margin_right = 36.0
-margin_bottom = 28.0
-rect_min_size = Vector2( 0, 2 )
-
-[node name="AddAttachmentButton" type="Button" parent="."]
-margin_left = 16.0
-margin_top = 29.0
-margin_right = 36.0
-margin_bottom = 49.0
+margin_bottom = 46.0
 hint_tooltip = "Attach a new decorator"
 text = "+"
 

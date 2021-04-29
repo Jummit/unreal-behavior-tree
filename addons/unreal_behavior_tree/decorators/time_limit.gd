@@ -19,8 +19,8 @@ func get_name() -> String:
 	return "Time Limit"
 
 
-func get_info() -> String:
-	return " max %s seconds" % seconds
+func get_text() -> String:
+	return "Take max. %ss" % seconds
 
 
 func run(node, subject : Node) -> bool:
