@@ -10,7 +10,7 @@ var breakpoints : Array
 var stopped := false
 var stop_on_next := false
 
-var stack : PoolIntArray
+var running : Array
 
 # Used so decorators can call `run` without having to worry about if the node
 # is another decorator or the actuall task/composite.
@@ -63,18 +63,18 @@ func _process(_delta : float) -> void:
 	if client and client.get_connection_status() !=\
 			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED:
 		client.poll()
-	for node in stack:
+	for node in running:
 		pass
 		# TODO: terminate if service says to do so
 
 
 func execute_node(node : int):
-	stack.append(node)
+	running.append(node)
 	if client and client.get_connection_status() ==\
 			NetworkedMultiplayerPeer.CONNECTION_CONNECTED:
 		client.get_peer(1).put_var({
-			type = "stack_update",
-			stack = stack,
+			type = "send_running",
+			nodes = running,
 		})
 	if node in breakpoints or stop_on_next:
 		stopped = true
@@ -107,13 +107,18 @@ func execute_node(node : int):
 		result = tree.nodes[node].run(self)
 		if result is GDScriptFunctionState:
 			result = yield(result, "completed")
-	stack.remove(stack.size() - 1)
+	running.erase(node)
 	yield(get_tree().create_timer(0.5), "timeout")
 	return result
 
 
 func _on_WebSocketClient_connection_established(protocol : String) -> void:
-	pass
+	yield(get_tree(), "idle_frame")
+	client.get_peer(1).put_var({
+		type = "info",
+		name = name,
+		tree = tree.resource_path,
+	})
 
 
 func _on_WebSocketClient_connection_closed(was_clean_close : bool) -> void:
@@ -140,5 +145,5 @@ func _on_WebSocketClient_data_received() -> void:
 
 
 func _on_ServiceTimer_timeout(service : BehaviorService, node : int) -> void:
-	if node in Array(stack):
+	if node in Array(running):
 		service.run(self)

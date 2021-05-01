@@ -23,9 +23,9 @@ func get_text() -> String:
 	return "Take max. %ss" % seconds
 
 
-func run(node, subject : Node) -> bool:
-	var timer := subject.get_tree().create_timer(seconds)
-	var result = node.run(subject)
+func run(node, player : Node) -> bool:
+	var timer := player.get_tree().create_timer(seconds)
+	var result = node.run(player)
 	if not result is GDScriptFunctionState:
 		return result
 	var signal_name : String = yield(Waiter.new(timer, "timeout", result,

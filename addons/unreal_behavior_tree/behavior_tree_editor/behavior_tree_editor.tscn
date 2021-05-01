@@ -9,12 +9,12 @@ scancode = 16777252
 [sub_resource type="ShortCut" id=2]
 shortcut = SubResource( 1 )
 
-[sub_resource type="InputEventKey" id=4]
+[sub_resource type="InputEventKey" id=3]
 pressed = true
 scancode = 16777253
 
-[sub_resource type="ShortCut" id=3]
-shortcut = SubResource( 4 )
+[sub_resource type="ShortCut" id=4]
+shortcut = SubResource( 3 )
 
 [sub_resource type="InputEventKey" id=5]
 pressed = true
@@ -89,7 +89,7 @@ margin_right = 984.0
 margin_bottom = 30.0
 hint_tooltip = "Step Over"
 disabled = true
-shortcut = SubResource( 3 )
+shortcut = SubResource( 4 )
 
 [node name="VSeparator3" type="VSeparator" parent="VBoxContainer/DebugPanel/HBoxContainer"]
 margin_left = 988.0
@@ -113,6 +113,12 @@ hint_tooltip = "Continue"
 disabled = true
 shortcut = SubResource( 6 )
 
+[node name="NodeOptionButton" type="OptionButton" parent="VBoxContainer/DebugPanel/HBoxContainer"]
+visible = false
+margin_left = 995.0
+margin_right = 1024.0
+margin_bottom = 30.0
+
 [connection signal="_begin_node_move" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_begin_node_move"]
 [connection signal="_end_node_move" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_end_node_move"]
 [connection signal="connection_request" from="VBoxContainer/GraphEdit" to="." method="_on_GraphEdit_connection_request"]
@@ -128,3 +134,4 @@ shortcut = SubResource( 6 )
 [connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/StepButton" to="." method="_on_StepButton_pressed"]
 [connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/BreakButton" to="." method="_on_BreakButton_pressed"]
 [connection signal="pressed" from="VBoxContainer/DebugPanel/HBoxContainer/ContinueButton" to="." method="_on_ContinueButton_pressed"]
+[connection signal="item_selected" from="VBoxContainer/DebugPanel/HBoxContainer/NodeOptionButton" to="." method="_on_NodeOptionButton_item_selected"]

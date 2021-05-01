@@ -11,8 +11,5 @@ func get_info() -> String:
 	return function
 
 
-func run(node, subject : Node) -> bool:
-	var result = subject.call(function)
-	if result is GDScriptFunctionState:
-		result = yield(result, "completed")
-	return result
+func should_abort(player : Node) -> bool:
+	return player.subject.call(function)

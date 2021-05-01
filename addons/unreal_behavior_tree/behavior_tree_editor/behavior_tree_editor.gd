@@ -13,10 +13,25 @@ var from_position : Vector2
 var search_dialog : ConfirmationDialog
 var adding_attachment_to : BehaviorNode
 var server := WebSocketServer.new()
-var client_id : int
-var breakpoints : Array
-var skip_breakpoints := false
-var current_node := -1
+var debug_connections : Array
+var connections_by_id : Dictionary
+var connections_by_tree : Dictionary
+var current_connection : DebugConnection setget set_current_connection
+var skip_breakpoints : bool
+var breakpoints : Dictionary
+
+class DebugConnection:
+	var client_id : int
+	var current_node : int
+	var active_nodes : PoolIntArray
+	var stopped : bool
+	var tree : BehaviorTree
+	var node_name : String
+	func _init(_tree : BehaviorTree, _node_name : String,
+			_client_id : int) -> void:
+		tree = _tree
+		node_name = _node_name
+		client_id = _client_id
 
 const Comment = preload("../resources/comment.gd")
 const BehaviorGraphNode = preload("behavior_graph_node/behavior_graph_node.gd")
@@ -28,6 +43,7 @@ onready var breakpoint_button : Button = $VBoxContainer/DebugPanel/HBoxContainer
 onready var skip_breakpoints_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/SkipBreakpointsButton
 onready var step_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/StepButton
 onready var break_button : Button = $VBoxContainer/DebugPanel/HBoxContainer/BreakButton
+onready var node_option_button : OptionButton = $VBoxContainer/DebugPanel/HBoxContainer/NodeOptionButton
 
 func _ready():
 	server.listen(7777)
@@ -71,7 +87,20 @@ func _process(_delta : float) -> void:
 
 func set_behavior_tree(to) -> void:
 	tree = to
+	if current_connection and current_connection.tree != tree and\
+			tree in connections_by_tree:
+		set_current_connection(connections_by_tree[tree].front())
 	update_graph()
+	update_node_dropdown()
+
+
+func set_current_connection(connection : DebugConnection) -> void:
+	current_connection = connection
+	if tree != connection.tree:
+		set_behavior_tree(connection.tree)
+	break_button.disabled = connection.stopped
+	step_button.disabled = not connection.stopped
+	continue_button.disabled = not connection.stopped
 
 
 func add_node(node : BehaviorNode, id : int, position : Vector2) -> void:
@@ -154,9 +183,9 @@ func update_graph() -> void:
 		graph_node.name = str(node_id)
 		graph_edit.add_child(graph_node)
 		graph_node.node = node
-		if node_id in breakpoints:
+		if current_connection and node_id in Array(current_connection.breakpoints):
 			graph_node.overlay = GraphNode.OVERLAY_BREAKPOINT
-		if node_id == current_node:
+		if current_connection and node_id == current_connection.current_node:
 			graph_node.overlay = GraphNode.OVERLAY_POSITION
 		graph_node.selected = node_id in selected
 		graph_node.connect("dragged", self, "_on_GraphNode_dragged",
@@ -173,12 +202,14 @@ func update_graph() -> void:
 
 
 func mark_breakpoints() -> void:
+	if not tree in breakpoints:
+		breakpoints[tree] = []
 	for node in graph_edit.get_children():
 		if node is GraphNode and node.selected:
-			if int(node.name) in breakpoints:
-				breakpoints.erase(int(node.name))
+			if int(node.name) in breakpoints[tree]:
+				breakpoints[tree].erase(int(node.name))
 			else:
-				breakpoints.append(int(node.name))
+				breakpoints[tree].append(int(node.name))
 	send_breakpoints()
 	update_graph()
 
@@ -186,11 +217,11 @@ func mark_breakpoints() -> void:
 func send_breakpoints():
 	send_message({
 		"type": "breakpoints",
-		"breakpoints": [] if skip_breakpoints else breakpoints,
-	})
+		"breakpoints": [] if skip_breakpoints else breakpoints[tree],
+	}, true)
 
 
-func update_graph_connections() -> void: 
+func update_graph_connections() -> void:
 	graph_edit.clear_connections()
 	for node in graph_edit.get_children():
 		if node is GraphNode and node.overlay == GraphNode.OVERLAY_POSITION:
@@ -199,18 +230,19 @@ func update_graph_connections() -> void:
 		var node : BehaviorNode = tree.nodes[node_id]
 		for to in node.connections:
 			graph_edit.connect_node(str(node_id), 0, str(to), 0)
+			if current_connection and\
+					to in Array(current_connection.active_nodes):
+				graph_edit.set_connection_activity(str(node_id), 0, str(to),
+						0, 100)
 
 
-func clear_activity() -> void:
-	for connection in graph_edit.get_connection_list():
-		graph_edit.set_connection_activity(connection.from, 0,
-				connection.to, 0, 0)
-
-
-func send_message(message : Dictionary) -> void:
-	if (server.get_connection_status() !=\
-			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED) and client_id:
-		server.get_peer(client_id).put_var(message)
+func send_message(message : Dictionary, to_all := false) -> void:
+	if server.get_connection_status() ==\
+			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED:
+		return
+	for connection in debug_connections if to_all else [current_connection]:
+		if connection.tree == tree:
+			server.get_peer(connection.client_id).put_var(message)
 
 
 func _on_BehaviorGraphNode_raise_request(node : BehaviorNode) -> void:
@@ -394,38 +426,58 @@ func _on_BehaviorGraphNode_attachment_added(attachment : BehaviorAttachment,
 
 
 func _on_WebSocketServer_client_connected(id : int, protocol : String) -> void:
-	break_button.disabled = false
-	client_id = id
+	server.set_block_signals(true)
+	while true:
+		var packet_id : int = yield(server, "data_received")
+		if packet_id == id:
+			var info : Dictionary = server.get_peer(id).get_var()
+			var client_tree = load(info.tree)
+			if not client_tree in connections_by_tree:
+				connections_by_tree[client_tree] = []
+			var new := DebugConnection.new(client_tree, info.name, id)
+			debug_connections.append(new)
+			connections_by_id[id] = new
+			connections_by_tree[client_tree].append(new)
+			break
+	server.set_block_signals(false)
 	send_breakpoints()
 
 
 func _on_WebSocketServer_client_disconnected(id : int, was_clean_close : bool) -> void:
-	break_button.disabled = true
-	step_button.disabled = true
-	continue_button.disabled = true
-	current_node = -1
-	client_id = 0
-	clear_activity()
+	var debug_connection : DebugConnection
+	for connected_tree in debug_connections:
+		for connection in debug_connections[connected_tree]:
+			if connection.client_id == id:
+				debug_connection = connection
+				break
+		if debug_connection:
+			break
 	update_graph()
 
 
 func _on_WebSocketServer_data_received(id : int) -> void:
-	var packet : Dictionary = server.get_peer(client_id).get_var()
+	var packet : Dictionary = server.get_peer(id).get_var()
 	match packet.type:
-		"stack_update":
-			clear_activity()
-			var last_node := 0
-			if packet.stack.empty():
-				return
-			current_node = packet.stack[packet.stack.size() - 1]
+		"send_running":
+			connections_by_id[id].active_nodes = packet.nodes
 			update_graph()
-			for node in packet.stack:
-				graph_edit.set_connection_activity(str(last_node), 0,
-						str(node), 0, 100)
-				last_node = node
 		"stopped":
-			step_button.disabled = false
-			continue_button.disabled = false
+			connections_by_id[id].stopped = true
+			set_current_connection(connections_by_id[id])
+
+
+func update_node_dropdown():
+	var show : bool = tree in connections_by_tree and\
+			connections_by_tree[tree].size()
+	node_option_button.visible = show
+	if show:
+		node_option_button.clear()
+		var id := 0
+		for connection in connections_by_tree[tree]:
+			node_option_button.add_item(connection.name, id)
+			if connection == current_connection:
+				node_option_button.selected = id
+			id += 1
 
 
 func _on_BreakpointButton_pressed() -> void:
@@ -441,7 +493,8 @@ func _on_SkipBreakpointsButton_pressed() -> void:
 
 func _on_BreakButton_pressed() -> void:
 	if server.get_connection_status() ==\
-			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED or not client_id:
+			NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED or\
+			not current_connection:
 		return
 	step_button.disabled = false
 	continue_button.disabled = false
@@ -453,6 +506,7 @@ func _on_BreakButton_pressed() -> void:
 func _on_ContinueButton_pressed() -> void:
 	step_button.disabled = true
 	continue_button.disabled = true
+	current_connection.stopped = false
 	send_message({
 		"type": "continue",
 	})
@@ -462,3 +516,7 @@ func _on_StepButton_pressed() -> void:
 	send_message({
 		"type": "next",
 	})
+
+
+func _on_NodeOptionButton_item_selected(index : int) -> void:
+	pass # Replace with function body.
