@@ -117,7 +117,8 @@ func add_attachment(node : BehaviorNode, attachment : BehaviorAttachment,
 	node.attachments.insert(position, attachment)
 
 
-func remove_attachment(node : BehaviorNode, attachment : BehaviorAttachment) -> void:
+func remove_attachment(node : BehaviorNode,
+		attachment : BehaviorAttachment) -> void:
 	node.attachments.erase(attachment)
 
 
@@ -214,7 +215,7 @@ func mark_breakpoints() -> void:
 	update_graph()
 
 
-func send_breakpoints():
+func send_breakpoints() -> void:
 	send_message({
 		"type": "breakpoints",
 		"breakpoints": [] if skip_breakpoints else breakpoints[tree],
@@ -243,6 +244,31 @@ func send_message(message : Dictionary, to_all := false) -> void:
 	for connection in debug_connections if to_all else [current_connection]:
 		if connection.tree == tree:
 			server.get_peer(connection.client_id).put_var(message)
+
+
+func do_add_attachment(node : BehaviorNode,
+		attachment : BehaviorAttachment) -> void:
+	undo_redo.create_action("Add Attachment")
+	undo_redo.add_do_method(self, "add_attachment", node,
+			attachment, node.attachments.size())
+	undo_redo.add_undo_method(self, "remove_attachment", node, attachment)
+	undo_redo.add_do_method(self, "update_graph")
+	undo_redo.add_undo_method(self, "update_graph")
+	undo_redo.commit_action()
+
+
+func update_node_dropdown() -> void:
+	var show : bool = tree in connections_by_tree and\
+			connections_by_tree[tree].size()
+	node_option_button.visible = show
+	if show:
+		node_option_button.clear()
+		var id := 0
+		for connection in connections_by_tree[tree]:
+			node_option_button.add_item(connection.name, id)
+			if connection == current_connection:
+				node_option_button.selected = id
+			id += 1
 
 
 func _on_BehaviorGraphNode_raise_request(node : BehaviorNode) -> void:
@@ -369,19 +395,9 @@ func _on_CommentGraph_resize_request(new_min_size : Vector2,
 	undo_redo.commit_action()
 
 
-func _on_SearchDialog_attachment_selected(attachment : BehaviorAttachment) -> void:
-	do_add_attachment(adding_attachment_to, attachment)
-
-
-func do_add_attachment(node : BehaviorNode,
+func _on_SearchDialog_attachment_selected(
 		attachment : BehaviorAttachment) -> void:
-	undo_redo.create_action("Add Attachment")
-	undo_redo.add_do_method(self, "add_attachment", node,
-			attachment, node.attachments.size())
-	undo_redo.add_undo_method(self, "remove_attachment", node, attachment)
-	undo_redo.add_do_method(self, "update_graph")
-	undo_redo.add_undo_method(self, "update_graph")
-	undo_redo.commit_action()
+	do_add_attachment(adding_attachment_to, attachment)
 
 
 func _show_create_dialog(on_mouse := true,
@@ -425,7 +441,7 @@ func _on_BehaviorGraphNode_attachment_added(attachment : BehaviorAttachment,
 		_show_create_dialog(false, search_dialog.Mode.Attachments)
 
 
-func _on_WebSocketServer_client_connected(id : int, protocol : String) -> void:
+func _on_WebSocketServer_client_connected(id : int, _protocol : String) -> void:
 	server.set_block_signals(true)
 	while true:
 		var packet_id : int = yield(server, "data_received")
@@ -443,7 +459,8 @@ func _on_WebSocketServer_client_connected(id : int, protocol : String) -> void:
 	send_breakpoints()
 
 
-func _on_WebSocketServer_client_disconnected(id : int, was_clean_close : bool) -> void:
+func _on_WebSocketServer_client_disconnected(id : int,
+		_was_clean_close : bool) -> void:
 	var debug_connection : DebugConnection
 	for connected_tree in debug_connections:
 		for connection in debug_connections[connected_tree]:
@@ -464,20 +481,6 @@ func _on_WebSocketServer_data_received(id : int) -> void:
 		"stopped":
 			connections_by_id[id].stopped = true
 			set_current_connection(connections_by_id[id])
-
-
-func update_node_dropdown():
-	var show : bool = tree in connections_by_tree and\
-			connections_by_tree[tree].size()
-	node_option_button.visible = show
-	if show:
-		node_option_button.clear()
-		var id := 0
-		for connection in connections_by_tree[tree]:
-			node_option_button.add_item(connection.name, id)
-			if connection == current_connection:
-				node_option_button.selected = id
-			id += 1
 
 
 func _on_BreakpointButton_pressed() -> void:

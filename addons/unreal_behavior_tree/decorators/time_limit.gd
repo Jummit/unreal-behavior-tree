@@ -2,18 +2,8 @@ tool
 extends BehaviorDecorator
 
 export var seconds := 1.0
-
-class Waiter:
-	signal completed(signal_name)
-	
-	func _init(object_a : Object, signal_a : String, object_b : Object,
-			signal_b : String) -> void:
-		object_a.connect(signal_a, self, "_on_Object_signal_emitted", [signal_a])
-		object_b.connect(signal_b, self, "_on_Object_signal_emitted", [signal_b])
-	
-	func _on_Object_signal_emitted(signal_name : String) -> void:
-		emit_signal("completed")
-
+var finished : Array
+var timers : Dictionary
 
 func get_name() -> String:
 	return "Time Limit"
@@ -23,13 +13,20 @@ func get_text() -> String:
 	return "Take max. %ss" % seconds
 
 
+func should_abort(player : Node) -> bool:
+	return player in finished
+
+
 func run(node, player : Node) -> bool:
+	if player in timers:
+		timers[player].disconnect("timeout", self, "_on_Timer_timeout")
+		finished.erase(player)
 	var timer := player.get_tree().create_timer(seconds)
-	var result = node.run(player)
-	if not result is GDScriptFunctionState:
-		return result
-	var signal_name : String = yield(Waiter.new(timer, "timeout", result,
-			"completed"), "completed")
-	if signal_name == "timeout":
-		return false
-	return result
+	timer.connect("timeout", self, "_on_Timer_timeout", [player])
+	timers[player] = timer
+	return true
+
+
+func _on_Timer_timeout(player : Node) -> void:
+	finished.append(player)
+	timers.erase(player)

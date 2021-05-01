@@ -65,7 +65,7 @@ func _process(_delta : float) -> void:
 		client.poll()
 	for node in running:
 		pass
-		# TODO: terminate if service says to do so
+		# TODO: terminate if decorator says to do so
 
 
 func execute_node(node : int):
